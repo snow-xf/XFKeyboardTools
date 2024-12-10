@@ -129,6 +129,53 @@ public extension View {
             )
         )
     }
+    
+    /// 默认工具栏
+    func keyboardToolDone() -> some View {
+        self.modifier(
+            KeyboardToolModifier(
+                type: .done,
+                text: .constant(""),
+                customView: EmptyView()
+            )
+        )
+    }
+    
+    
+    /// 网络工具栏
+    func keyboardToolNetwork(text: Binding<String>) -> some View {
+        self.modifier(
+            KeyboardToolModifier(
+                type: .network,
+                text: text,
+                customView: EmptyView()
+            )
+        )
+    }
+    
+    
+    /// email工具栏
+    func keyboardToolEmail(text: Binding<String>) -> some View {
+        self.modifier(
+            KeyboardToolModifier(
+                type: .email,
+                text: text,
+                customView: EmptyView()
+            )
+        )
+    }
+    
+    
+    /// 自定义View工具栏
+    func keyboardToolCustom<CustomView: View>(text: Binding<String>,customView: CustomView) -> some View {
+        self.modifier(
+            KeyboardToolModifier(
+                type: .custom,
+                text: text,
+                customView: customView
+            )
+        )
+    }
 }
 
 
