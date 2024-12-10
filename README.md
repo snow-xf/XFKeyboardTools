@@ -1,7 +1,7 @@
 
-# KeyboardTool
+# XFKeyboardTools
 
-`KeyboardTool` 是一个适用于 SwiftUI 的键盘工具栏管理组件。它提供了网络输入、邮箱输入、自定义视图以及关闭键盘等功能的工具栏，方便开发者快速集成和扩展键盘工具栏。
+`XFKeyboardTools` 是一个适用于 SwiftUI 的键盘工具栏管理组件。它提供了网络输入、邮箱输入、自定义视图以及关闭键盘等功能的工具栏，方便开发者快速集成和扩展键盘工具栏。
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## 安装
 
-1. 将 `KeyboardTool` 文件添加到你的项目中。
+1. 将 `XFKeyboardTools` 文件添加到你的项目中。
 2. 确保你的项目使用 **iOS 15.0** 或更高版本。
 3. 在需要使用的 SwiftUI 视图中导入 `SwiftUI`。
 
@@ -34,7 +34,7 @@
 #### 使用网络工具栏
 ```swift
 import SwiftUI
-
+import XFKeyboardTools
 struct ContentView: View {
     @State private var text: String = ""
     
@@ -50,7 +50,7 @@ struct ContentView: View {
 #### 使用邮箱工具栏
 ```swift
 import SwiftUI
-
+import XFKeyboardTools
 struct EmailView: View {
     @State private var email: String = ""
     
@@ -66,7 +66,7 @@ struct EmailView: View {
 ### 2. 使用完成按钮工具栏
 ```swift
 import SwiftUI
-
+import XFKeyboardTools
 struct DoneView: View {
     @State private var input: String = ""
     
@@ -82,7 +82,7 @@ struct DoneView: View {
 ### 3. 使用自定义工具栏视图
 ```swift
 import SwiftUI
-
+import XFKeyboardTools
 struct CustomToolbarView: View {
     @State private var input: String = ""
 
@@ -111,4 +111,4 @@ struct CustomToolbarView: View {
 
 ---
 
-通过以上方式，你可以轻松地在 SwiftUI 项目中集成和使用 `KeyboardTool`，为你的用户提供更佳的输入体验。
+通过以上方式，你可以轻松地在 SwiftUI 项目中集成和使用 `XFKeyboardTools`，为你的用户提供更佳的输入体验。
