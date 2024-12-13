@@ -18,7 +18,7 @@ class KeyboardToolManager {
     func getItems(for type: KeyboardToolType) -> [String] {
         switch type {
         case .network:
-            return ["http://", "https://", "www.", ".com", ".cn", ".net", ".org", ".live"]
+            return ["http://", "https://", "www.", ".com", ".cn", ".net", ".org", ".dev"]
         case .email:
             return [".com", "@qq.com", "@163.com", "@gmail.com", "@yahoo.com", "@outlook.com"]
         case .done, .custom:
@@ -177,5 +177,3 @@ public extension View {
         )
     }
 }
-
-
