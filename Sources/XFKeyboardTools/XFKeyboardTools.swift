@@ -151,10 +151,6 @@ public extension View {
             )
         )
     }
-<<<<<<< Updated upstream
-}
-
-=======
     
     /// 默认工具栏
     func keyboardToolDone() -> some View {
@@ -234,6 +230,4 @@ public extension View {
 //        }
 //    }
 //}
-
->>>>>>> Stashed changes
 
