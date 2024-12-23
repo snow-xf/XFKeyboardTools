@@ -61,23 +61,36 @@ struct ToolbarItemsView<CustomView: View>: View {
     var body: some View {
         VStack(spacing: 6) {
             if type == .regex {
-                // 添加类别切换器
-                Picker("分类", selection: $selectedCategory) {
-                    ForEach(RegexSymbolCategory.allCases, id: \.self) { category in
-                        Text(category.rawValue)
+                // 使用横向布局的类别切换器
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(RegexSymbolCategory.allCases, id: \.self) { category in
+                            Button(action: {
+                                selectedCategory = category
+                            }) {
+                                Text(category.rawValue)
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .fill(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
+                                    )
+                                    .foregroundColor(selectedCategory == category ? .white : .primary)
+                            }
+                        }
                     }
+                    .padding(.horizontal, 8)
                 }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding(.horizontal)
+                .frame(height: 44) // 控制切换器的高度
             }
 
-            HStack {
+            HStack(alignment: .center) {
                 // 滚动显示工具栏项
                 ScrollView(.horizontal, showsIndicators: false) {
                     createView()
                         .padding(.horizontal, 8)
                 }
-                .frame(minHeight: 44)
+                .frame(minHeight: 60)
 
                 // 关闭键盘按钮
                 Button(action: hideKeyboardAction) {
@@ -90,7 +103,10 @@ struct ToolbarItemsView<CustomView: View>: View {
                         )
                 }
             }
+            .frame(minHeight: 60)
         }
+        .padding(.vertical, 4) // 额外的垂直间距
+        .background(Color(UIColor.systemGroupedBackground)) // 添加背景颜色
     }
 
     /// 根据工具栏类型创建按钮视图
@@ -114,10 +130,11 @@ struct ToolbarItemsView<CustomView: View>: View {
                         text.wrappedValue.append(item)
                     }) {
                         Text(item)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 16) // 增大按钮的水平内边距
+                            .padding(.vertical, 10)   // 增大按钮的垂直内边距
                             .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(8)
+                            .frame(minHeight: 44)    // 设置按钮最小高度
                     }
                 }
             }
