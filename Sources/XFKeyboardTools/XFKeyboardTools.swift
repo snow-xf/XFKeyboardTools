@@ -1,48 +1,36 @@
 import SwiftUI
 
+/// 正则符号类别和符号数据
+public struct RegexSymbol {
+    static let allSymbols: [String] = [
+        "\\d", "\\D", "\\s", "\\S", "\\w", "\\W", ".", "^", "$", "\\b", "\\B",
+        "*", "+", "?", "{", "}", "(", ")", "[", "]",
+        ":", "|", "\\"
+    ]
+}
+
 /// 键盘工具栏的类型
 public enum KeyboardToolType {
     case network
     case email
     case done
     case custom
-    case regex // 支持正则工具栏
-}
-
-/// 正则符号类别
-public enum RegexSymbolCategory: String, CaseIterable {
-    case characterClass = "字符类"
-    case anchors = "锚点"
-    case quantifiers = "量词"
-    case groups = "分组"
-    case specials = "特殊符号"
-
-    var symbols: [String] {
-        switch self {
-        case .characterClass: return ["\\d", "\\w", "\\s", "\\D", "\\W", "\\S", "."]
-        case .anchors: return ["^", "$", "\\b", "\\B"]
-        case .quantifiers: return ["*", "+", "?", "{n}", "{n,}", "{n,m}"]
-        case .groups: return ["()", "[]", "{}", "(?:)", "(?=)", "(?!)"]
-        case .specials: return ["|", "\\n", "\\t", "\\\\", "\\(", "\\)"]
-        }
-    }
+    case regex
 }
 
 /// 单例管理键盘工具栏
 class KeyboardToolManager {
     @MainActor public static let shared = KeyboardToolManager()
-
     private init() {}
 
-    /// 获取工具栏按钮项
-    func getItems(for type: KeyboardToolType, category: RegexSymbolCategory? = nil) -> [String] {
+    func getItems(for type: KeyboardToolType) -> [String] {
         switch type {
         case .network:
             return ["http://", "https://", "www.", ".com", ".cn", ".net", ".org", ".dev"]
         case .email:
             return [".com", "@qq.com", "@163.com", "@gmail.com", "@yahoo.com", "@outlook.com"]
         case .regex:
-            return category?.symbols ?? []
+            return RegexSymbol.allSymbols
         case .done, .custom:
             return []
         }
@@ -54,91 +42,55 @@ struct ToolbarItemsView<CustomView: View>: View {
     let type: KeyboardToolType
     let text: Binding<String>
     let customView: CustomView
-    let hideKeyboardAction: () -> Void
 
-    @State private var selectedCategory: RegexSymbolCategory = .characterClass // 默认类别
+    @FocusState private var dummyFocus: Bool
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 6) {
-            if type == .regex {
-                // 使用横向布局的类别切换器
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        ForEach(RegexSymbolCategory.allCases, id: \.self) { category in
-                            Button(action: {
-                                selectedCategory = category
-                            }) {
-                                Text(category.rawValue)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .fill(selectedCategory == category ? Color.blue : Color.gray.opacity(0.2))
-                                    )
-                                    .foregroundColor(selectedCategory == category ? .white : .primary)
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                }
-                .frame(height: 44) // 控制切换器的高度
-            }
-
-            HStack(alignment: .center) {
-                // 滚动显示工具栏项
-                ScrollView(.horizontal, showsIndicators: false) {
+        HStack(spacing: 12) {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 12) {
                     createView()
-                        .padding(.horizontal, 8)
                 }
-                .frame(minHeight: 60)
-
-                // 关闭键盘按钮
-                Button(action: hideKeyboardAction) {
-                    Image(systemName: "keyboard.chevron.compact.down")
-                        .foregroundColor(.primary)
-                        .padding(8)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(UIColor.secondarySystemGroupedBackground))
-                        )
-                }
+                .padding(.horizontal, 8)
             }
-            .frame(minHeight: 60)
+
+            Button(action: {
+                dummyFocus = false
+                dismiss()
+            }) {
+                Image(systemName: "keyboard.chevron.compact.down")
+                    .foregroundColor(.primary)
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color(UIColor.secondarySystemGroupedBackground))
+                    )
+            }
         }
-        .padding(.vertical, 4) // 额外的垂直间距
-        .background(Color(UIColor.systemGroupedBackground)) // 添加背景颜色
+        .padding(.vertical, 4)
     }
 
-    /// 根据工具栏类型创建按钮视图
+    @ViewBuilder
     private func createView() -> some View {
         if case .custom = type {
-            return AnyView(customView)
-        }
-
-        let items: [String] = {
-            if type == .regex {
-                return KeyboardToolManager.shared.getItems(for: type, category: selectedCategory)
-            } else {
-                return KeyboardToolManager.shared.getItems(for: type)
-            }
-        }()
-
-        return AnyView(
+            customView
+        } else {
+            let items = KeyboardToolManager.shared.getItems(for: type)
             HStack(spacing: 12) {
                 ForEach(items, id: \.self) { item in
                     Button(action: {
                         text.wrappedValue.append(item)
                     }) {
                         Text(item)
-                            .padding(.horizontal, 16) // 增大按钮的水平内边距
-                            .padding(.vertical, 10)   // 增大按钮的垂直内边距
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 10)
                             .background(Color(UIColor.secondarySystemGroupedBackground))
                             .cornerRadius(8)
-                            .frame(minHeight: 44)    // 设置按钮最小高度
                     }
                 }
             }
-        )
+        }
     }
 }
 
@@ -158,23 +110,16 @@ struct KeyboardToolModifier<CustomView: View>: ViewModifier {
                         ToolbarItemsView(
                             type: type,
                             text: text,
-                            customView: customView,
-                            hideKeyboardAction: hideKeyboard
+                            customView: customView
                         )
                     }
                 }
             }
     }
-
-    /// 隐藏键盘
-    @MainActor private func hideKeyboard() {
-        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-    }
 }
 
 @available(iOS 15.0, *)
 public extension View {
-    /// 为当前视图添加键盘工具栏
     func keyboardTool<CustomView: View>(
         type: KeyboardToolType,
         text: Binding<String>,
@@ -188,8 +133,7 @@ public extension View {
             )
         )
     }
-    
-    /// 默认工具栏
+
     func keyboardToolDone() -> some View {
         self.modifier(
             KeyboardToolModifier(
@@ -199,8 +143,7 @@ public extension View {
             )
         )
     }
-    
-    /// 网络工具栏
+
     func keyboardToolNetwork(text: Binding<String>) -> some View {
         self.modifier(
             KeyboardToolModifier(
@@ -210,8 +153,7 @@ public extension View {
             )
         )
     }
-    
-    /// email工具栏
+
     func keyboardToolEmail(text: Binding<String>) -> some View {
         self.modifier(
             KeyboardToolModifier(
@@ -221,8 +163,7 @@ public extension View {
             )
         )
     }
-    
-    /// 自定义View工具栏
+
     func keyboardToolCustom<CustomView: View>(text: Binding<String>, customView: CustomView) -> some View {
         self.modifier(
             KeyboardToolModifier(
@@ -233,7 +174,6 @@ public extension View {
         )
     }
 
-    /// 正则工具栏
     func keyboardToolRegex(text: Binding<String>) -> some View {
         self.modifier(
             KeyboardToolModifier(
